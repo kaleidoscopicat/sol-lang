@@ -1,2 +1,5 @@
 # sol-lang
-lightweight interpreted language that has simple lexing for quick calculations and performance written in c++. pretty cool if you ask me.
+Lightweight interpeted language that has simple syntax, written in C++ in a few weeks as a short-term project.
+Primarily used for quick calculations and fun.
+
+# Syntax
