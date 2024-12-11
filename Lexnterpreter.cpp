@@ -8,7 +8,7 @@
 using namespace std;
 
 enum OperatorType {Mult, Div, Add, Sub};
-enum TokenType {Unassigned, Number, Identifier, Operator, String};
+enum TokenType {Unassigned, Number, Identifier, Operator, String, NewLine};
 
 struct Token
 {
@@ -78,13 +78,22 @@ vector<Token*> LexInput(vector<string> inp)
                 
                 bCharCount++;
             }
-            else if (c == ':' || c == '!' || c == '=' || c == '%' || c == '&' || c == '*' || c == '/' || c == '+' || c == '-' || c == '(' || c == '>' || c == '<' || c == '\\' || c == '\'' || c == ' ')
+            else if (c == ':' || c == '!' || c == '=' || c == '%' || c == '&' || c == '*' || c == '/' || c == '+' || c == '-' || c == '(' || c == '>' || c == '<' || c == '\\' || c == '\'')
             {
                 tokens.push_back(currentToken);
                 
                 currentToken = new Token();
                 currentToken->type = TokenType::Operator;
             }
+			else if (c == ' ')
+			{
+				tokens.push_back(currentToken);
+				
+				currentToken = new Token();
+				
+				// refuse to add this character to the list of tokens, completely
+				continue;
+			}
 
             if (currentToken->type == TokenType::Operator)
             {
@@ -98,9 +107,11 @@ vector<Token*> LexInput(vector<string> inp)
 
             bool pInString = inString;
             bool pInBrackets = inBrackets;
-            
-            inString = !sCharCount % 2 == 0;
-            inBrackets = !bCharCount % 2 == 0;
+			
+			// when inside of a string, the no. of quotation marks relative to the character must be odd, and vice versa.
+			// the same applies to brackets
+            inString = !(sCharCount % 2 == 0);
+            inBrackets = !(bCharCount % 2 == 0);
 
             if (inString && !pInString || inBrackets && !pInBrackets)
             {
@@ -110,7 +121,7 @@ vector<Token*> LexInput(vector<string> inp)
 
             if (currentToken->type == TokenType::Operator)
             {
-                // Skip past if this is an operator    
+                // skip past if this is an operator    
                 tokens.push_back(currentToken);
                 currentToken = new Token();
             }
@@ -121,7 +132,7 @@ vector<Token*> LexInput(vector<string> inp)
             propertyToken.inBrackets = inBrackets;
             propertyToken.inString = inString;
 
-            if (!propertyToken.inString)
+            if (!inString)
             {
                 if (!isdigit(c) && currentToken->type != TokenType::Operator)
                 {
@@ -141,6 +152,14 @@ vector<Token*> LexInput(vector<string> inp)
         // new token per line
         currentToken->value += "\n";
         tokens.push_back(currentToken);
+
+		// assign token type
+		Token qToken = *currentToken;
+		if (qToken.value == '\n')
+		{
+			currentToken->type = TokenType::NewLine
+		}
+		
         currentToken = new Token();
     }
     
@@ -180,7 +199,7 @@ int main (int argc, char *argv[])
     cout << "\nNumber: " << TokenType::Number;
     cout << "\nIdentifier: " << TokenType::Identifier;
     cout << "\nOperator: " << TokenType::Operator;
-    cout << "\nString: " << TokenType::String;
+    cout << "\nString: " << TokenType::String << "\n";
     
     for (Token* token : tokens)
     {
